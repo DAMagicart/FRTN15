@@ -10,8 +10,8 @@ A = eye(4);                %test - 4*4
 B = ones(4,2);             %test - 4*1
 
 %Constraints for the control signal u - Jag vet inte vad dessa ska va.
-Au = eye(2*Hu);
-Bu = ones(2*Hu,1);
+% Au = eye(2*Hu);
+% Bu = ones(2*Hu,1);
 u0 = zeros(2*Hu,1);
                 
 Mp = zeros(Hp*4, Hu*2);
@@ -34,8 +34,13 @@ Rmat = zeros(2*Hu, 2*Hu);
 for k = 1:Hu
     Rmat(k,k) = R;
 end
-
-Jt = @(t)[(Xk'*Qmat*Xk) + [t]'*Rmat*[t]];
-J1 = fmincon(Jt, u0, Au, Bu);
+lb=zeros(2*Hu,1);
+ub=zeros(2*Hu,1);
+for i=1:Hu
+    lb(2*i-1:2*i)=[-0.2; -Inf];
+    ub(2*i-1:2*i)=[0.2, Inf];
+end
+Ju = @(uMin)[(Xk'*Qmat*Xk) + [uMin]'*Rmat*[uMin]];
+J1 = fmincon(Ju, u0,[],[],[],[],lb,ub);
 J = reshape(J1, [2,Hu])';
 end
